@@ -1,30 +1,69 @@
 const {response} = require('express') // Para que coja las funciones de express, porque si no, no las coge.
+const bcrypt = require('bcryptjs')
+const Usuario = require('../modelos/Usuarios')
 
-const registrar = (req, res = response) => {
-    const {nombre, email, password }= req.body // Almacenamos los datos.
-    if (password.length < 8){          // Si la longitud de la contraseña es inferior a 8, nos saltará...
-        return res.status(400).json({  // Este mensaje, en el cuál mostraremos que no es válido y devolveremos el HTTP BAD REQUEST a 400.
-            ok: false, 
-            mensaje: " La contraseña debe tener mínimo 8 caracteres "
+const salt = bcrypt.genSaltSync(10)
+
+const registrar = async(req, res = response) => {
+    const { email, password }= req.body // Almacenamos los datos.
+    try{
+        let usuario = await Usuario.findOne({ email })
+        //console.log(usuario)
+        if ( usuario ){
+            return res.status(400).json({                                 // Mostramos los datos.
+                ok : false,
+                mensaje: "Usuario ya existe en la BD."
+            })
+        }
+        usuario = new Usuario(req.body)
+        usuario.password = bcrypt.hashSync(password, salt)
+        await usuario.save()
+        return res.status(201).json({                                 // Mostramos los datos.
+            ok : true,
+            mensaje: "registro",
+            nombre: usuario.nombre,
+            email : usuario.email,
+            password : usuario.password
+    })
+    }catch(error){
+        return res.status(500).json({
+            ok: false,
+            mensaje: 'error en el servidor'
         })
     }
-    return res.json({                                 // Mostramos los datos.
-        ok : true,
-        mensaje: "registro",
-        nombre,
-        email,
-        password
-    })
 }
 
-const loguear = (req, res = response) => {
-    const {email, password }= req.body      // Desestructuramos los datos.
-    res.json({                              // Mostramos los datos.
-        ok : true,
-        mensaje: "login",
-        email,
-        password
-    })
+const loguear = async(req, res = response) => {
+    
+    const {email, password }= req.body
+    try{
+    let usuario = await Usuario.findOne({ email })
+        if( !usuario ){
+            // Desestructuramos los datos.
+            return res.status(400).json({// Mostramos los datos.
+                ok : false,
+                mensaje: "usuario no existe en la BD.",
+            })
+        }
+        if (! bcrypt.compareSync(password, usuario.password)){
+            return res.status(400).json({// Mostramos los datos.
+                ok : false,
+                mensaje: "credenciales erróneas.",
+            })
+        }
+        return res.json({// Mostramos los datos.
+            ok : true,
+            mensaje: "login",
+            email,
+            id: usuario.id
+        })
+    }   catch(error){
+        return res.status(500).json({
+            ok: false,
+            mensaje: 'error en el servidor.'
+        })
+    }
+       
 }
 
 module.exports = {

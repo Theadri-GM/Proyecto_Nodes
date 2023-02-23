@@ -8,12 +8,14 @@
 const express = require('express')
 require('dotenv').config()
 const auth = require('./rutas/auth')
+const  { conexion } = require('./database/config')
 //console.log(process.env.puerto)
 // Creación de nuestro servidor.
 const app = express()
 
-// Permitimos escritura y lectura de json
+// Permitimos escritura y lectura de json. (POST y GET desde POSTMAN)
 app.use(express.json())
+
 // ruta de autenticación.
 app.use('/api/user', auth)
 
@@ -22,3 +24,6 @@ const PORT = process.env.PORT || 3000
 app.listen(PORT), () => {
     console.log("El servidor corriendo en el puerto 3000")
 }
+
+// Conexion a la BD
+conexion()
