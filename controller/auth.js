@@ -6,12 +6,12 @@ const { generarJWT } = require('../helper/jwt')
 const salt = bcrypt.genSaltSync(10)
 
 const registrar = async(req, res = response) => {
-    const { email, password }= req.body // Almacenamos los datos.
+    const { email, password }= req.body   // Almacenamos los datos.
     try{
         let usuario = await Usuario.findOne({ email })
         //console.log(usuario)
         if ( usuario ){
-            return res.status(400).json({                                 // Mostramos los datos.
+            return res.status(400).json({ // Mostramos los datos.
                 ok : false,
                 mensaje: "Usuario ya existe en la BD."
             })
@@ -19,9 +19,10 @@ const registrar = async(req, res = response) => {
         usuario = new Usuario(req.body)
         usuario.password = bcrypt.hashSync(password, salt)
         await usuario.save()
+
         // generar token
         const token =  await generarJWT(usuario.id, usuario.nombre)
-        return res.status(201).json({                                 // Mostramos los datos.
+        return res.status(201).json({   // Mostramos los datos.
             ok : true,
             mensaje: "registro",
             nombre: usuario.nombre,
@@ -38,7 +39,6 @@ const registrar = async(req, res = response) => {
 }
 
 const loguear = async(req, res = response) => {
-    
     const {email, password }= req.body
     try{
     let usuario = await Usuario.findOne({ email })
