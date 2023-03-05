@@ -8,6 +8,7 @@
 const express = require('express')
 require('dotenv').config()
 const auth = require('./rutas/auth')
+const authJuegos = require('./rutas/rutasJuegos')
 const  { conexion } = require('./database/config')
 //console.log(process.env.puerto)
 // Creación de nuestro servidor.
@@ -18,6 +19,9 @@ app.use(express.json())
 
 // ruta de autenticación.
 app.use('/api/user', auth)
+
+// ruta que definimos nosotros.
+app.use('/api/juegos', authJuegos)
 
 const PORT = process.env.PORT || 3000
 
