@@ -55,11 +55,83 @@ const buscarJuego = async(req, res = response) => {
         })
     }
     catch( error ){
-        
     }
-       
+}
+
+// Actualizar un juego.
+const actualizaJuego = async( req, res = response ) => {
+const {nombre} = req.params;
+const { anio, categoria } = req.body;
+
+try{
+    // Actualizamos el registro con el titulo que le pase el usuario.
+    const result = await Juego.updateOne(
+        {_nombre: nombre},
+        {$set: { nombre, anio, categoria } }
+    );
+
+    // Recogemos los resultados de la operación.
+    if (result.modifiedCount === 0) {
+        return res.status(404).json({
+            msg:'No se ha encontrado ese juego. '
+        });
+    }
+    return res.json({
+        msg: ' Juego actualizado. '
+    });
+}catch(error){
+    console.error(error);
+    return res.status(500).json({
+        msg: 'Error en el Servidor. '
+    })
+}
+
+}
+
+// Eliminar un juego.
+const eliminarJuego = async (req, res) => {
+    const { nombre } = req.params;
+
+    try{
+        // Eliminar el registro con el titulo especificado.
+        const result = await Juego.deleteOne({_nombre: nombre});
+
+        // Manejamos el resultado.
+        if (result.deletedCount === 0 ){
+            return res.status(404).json({
+                msg: 'No hemos encontrado el juego.'
+            });
+        }
+
+        return res.json({
+            msg: 'Juego eliminado.'
+        });
+    }catch(error){
+        console.log(error);
+        return res.status(500).json({
+            msg: 'Error en el servidor.'
+        })
+    }
+}
+
+// Listar todos los juegos
+const listarJuegos = async (req, res = response) => {
+    try{
+        const juegos = await Juego.find();
+
+        return res.json({
+            ok: true,
+            juegos
+        });
+    }catch(error){
+        console.error(error);
+        return res.status(500).json({
+            ok: false,
+            mensaje: "Error en el servidor."
+        });
+    }
 }
 
 module.exports = {
-    registrarJuego, buscarJuego
+    registrarJuego, buscarJuego, actualizaJuego, eliminarJuego, listarJuegos
 }
